@@ -11,7 +11,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/mikecodejs/pokecenter-atem">
-    <img src="./docs/assets/logo.png" alt="Logo" width="450" height="auto" style="max-width: 100%;" />
+    <img src="./docs/assets/logo.jpg" alt="Logo" width="250" height="auto" style="max-width: 100%;" />
   </a>
 
   <h3 align="center">PokéCenter de Pallet Town</h3>
@@ -60,7 +60,7 @@ Para executar a aplicação execute
 yarn ms-getaway dev
 ```
 
-Acesse seu `http://localhost:8080/docs` para tera acesso aos endpoints da aplicação.
+Acesse seu `http://localhost:8080/` para tera acesso aos endpoints da aplicação.
 
 <img src="./docs/assets/screen.png" alt="Logo" height="auto" style="max-width: 100%" />
 
