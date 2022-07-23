@@ -18,7 +18,7 @@
   <br />
 
   <p align="center">
-    <a href="http://localhost:8080/docs">
+    <a href="http://localhost:8080/">
       <strong>Ver a documentação da API (localhost required) »</strong>
     </a>
   </p>
