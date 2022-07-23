@@ -1,0 +1,16 @@
+{
+	"name": "@workspace/ms-customer",
+	"version": "1.0.0",
+	"main": "./src/app.ts",
+	"license": "MIT",
+	"dependencies": {
+		"@faker-js/faker": "^7.3.0",
+		"lodash": "^4.17.21",
+		"mongo-objectid": "^1.2.2",
+		"validate-objectid": "^0.2.0"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.14.182",
+		"@types/validate-objectid": "^0.2.0"
+	}
+}

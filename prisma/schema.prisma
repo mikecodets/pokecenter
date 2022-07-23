@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["mongoDb"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String        @unique
+  phone        String
+  account      Account?      @relation(fields: [accountId], references: [id])
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  accountId    String        @db.ObjectId
+}
+
+model Account {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  balance   Float
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Customer  Customer[]
+}
+
+model Transaction {
+  id            String                   @id @default(auto()) @map("_id") @db.ObjectId
+  amount        Float
+  methodPayment TransactionMethodPayment
+  operation     TransactionOperation?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  Customer      Customer?                @relation(fields: [customerId], references: [id])
+  customerId    String?                  @db.ObjectId
+}
+
+enum TransactionMethodPayment {
+  DEBIT
+  CREDIT
+  PIX
+  BOLETO
+}
+
+enum TransactionOperation {
+  DEPOSIT
+  WITHDRAW
+}

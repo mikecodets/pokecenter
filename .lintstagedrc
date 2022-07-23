@@ -1,0 +1,6 @@
+{
+	"*.{ts,js}": [
+		"yarn prettier --write",
+		"yarn lint:fix"
+	]
+}
