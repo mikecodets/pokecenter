@@ -115,6 +115,15 @@ export class TransactionService {
 			);
 		}
 
+		if (payingId === beneficiaryId) {
+			throw new Error(
+				HttpErrorHandler.targetError({
+					message: "It is not possible to perform a self transfer",
+					status: 400,
+				}),
+			);
+		}
+
 		if (transaction.amount <= 0) {
 			throw new Error(
 				HttpErrorHandler.targetError({

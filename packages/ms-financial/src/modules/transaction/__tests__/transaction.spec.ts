@@ -3,7 +3,7 @@ import { CustomerService } from "@workspace/ms-customer";
 import {
 	AccountBuilder,
 	CustomerBuilder,
-	TransactionBuilder
+	TransactionBuilder,
 } from "../../../../../../shared/builder/main.builder";
 import { AccountService } from "../../account/account.service";
 import { TransactionService } from "../transaction.service";
@@ -210,6 +210,30 @@ describe("Transaction service transfer", () => {
 				),
 			);
 		});
+	});
+
+	it("should fail when trying to perform an auto transfer", async () => {
+		const id = faker.database.mongodbObjectId();
+		const payingId = id;
+		const receiverId = id;
+		const transaction = new TransactionBuilder(
+			"CREDIT",
+			undefined,
+			false,
+		).build();
+
+		await TransactionService.transfer(payingId, receiverId, transaction).catch(
+			(error) => {
+				expect(error).toEqual(
+					new Error(
+						JSON.stringify({
+							message: "It is not possible to perform a self transfer",
+							status: 400,
+						}),
+					),
+				);
+			},
+		);
 	});
 
 	it("must fail when the amount is equal to or less than 0", async () => {

@@ -10,11 +10,7 @@
 <!-- RESUMO -->
 <br />
 <p align="center">
-  <a href="https://github.com/mikecodejs/pokecenter-atem">
-    <img src="./docs/assets/logo.jpg" alt="Logo" width="250" height="auto" style="max-width: 100%;" />
-  </a>
-
-  <h3 align="center">PokéCenter de Pallet Town</h3>
+  <h1 align="center">PokéCenter de Pallet Town</h1>
   <br />
 
   <p align="center">
