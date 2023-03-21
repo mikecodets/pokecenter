@@ -10,7 +10,7 @@
 <!-- RESUMO -->
 <br />
 <p align="center">
-  <h1 align="center">PokéCenter de Pallet Town</h1>
+  <h1 align="center">Pokecenter de Pallet Town</h1>
   <br />
 
   <p align="center">
@@ -53,12 +53,12 @@ API_PORT=8080
 Para executar a aplicação execute
 
 ```
-yarn ms-getaway dev
+yarn ms-getaway
 ```
 
 Acesse seu `http://localhost:8080/` para tera acesso aos endpoints da aplicação.
 
-<img src="./docs/assets/screen.png" alt="Logo" height="auto" style="max-width: 100%" />
+<img src="./docs/assets/home.png" alt="Logo" height="auto" style="max-width: 100%" />
 
 ### ⚙️ Executando os testes
 
