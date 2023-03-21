@@ -29,11 +29,7 @@ export default class AccountService {
 		return account;
 	}
 
-	async updateBalance(
-		customerId: string,
-		amount: number,
-		type: AccountOperationType,
-	): Promise<Account> {
+	async updateBalance(customerId: string, amount: number, type: AccountOperationType): Promise<Account> {
 		const accountId = await this.getAccountId(customerId);
 
 		const data: AccountUpdateData = {};

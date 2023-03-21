@@ -1,6 +1,4 @@
 {
-  "cSpell.words": [
-    "middlewares",
-    "usecases"
-  ]
+	"cSpell.words": ["middlewares", "usecases"],
+	"editor.rulers": [120]
 }

@@ -2,29 +2,23 @@ import { Transaction, TransactionOperation } from "@prisma/client";
 import CustomerService from "@workspace/ms-customer";
 import prisma from "../../../../shared/clients/prisma/client";
 import { NotAcceptable } from "../../../../shared/middlewares/errors/usecases/not-acceptable";
-import ObjectIdSchema from "../../../../shared/utils/object-id.schema";
 import { AccountOperationType } from "../account/account.enum";
 import AccountService from "../account/account.service";
 import { TransactionTransfer } from "./transaction.domain";
 import TransactionSchema from "./transaction.schema";
 
 export default class TransactionService {
-	private readonly objectIdSchema: ObjectIdSchema;
 	private readonly transactionSchema: TransactionSchema;
 	private readonly customerService: CustomerService;
 	private readonly accountService: AccountService;
 
 	constructor() {
-		this.objectIdSchema = new ObjectIdSchema();
 		this.transactionSchema = new TransactionSchema();
 		this.customerService = new CustomerService();
 		this.accountService = new AccountService();
 	}
 
-	async deposit(
-		customerId: string,
-		transaction: Transaction,
-	): Promise<Transaction> {
+	async deposit(customerId: string, transaction: Transaction): Promise<Transaction> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		const customer = await this.customerService.getById(customerId);
@@ -44,10 +38,7 @@ export default class TransactionService {
 		});
 	}
 
-	async withdraw(
-		customerId: string,
-		transaction: Transaction,
-	): Promise<Transaction> {
+	async withdraw(customerId: string, transaction: Transaction): Promise<Transaction> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		const customer = await this.customerService.getById(customerId);
@@ -75,11 +66,7 @@ export default class TransactionService {
 		});
 	}
 
-	async transfer(
-		payingId: string,
-		beneficiaryId: string,
-		transaction: Transaction,
-	): Promise<TransactionTransfer> {
+	async transfer(payingId: string, beneficiaryId: string, transaction: Transaction): Promise<TransactionTransfer> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		if (payingId === beneficiaryId) {
@@ -90,15 +77,10 @@ export default class TransactionService {
 		const beneficiary = await this.customerService.getById(beneficiaryId);
 
 		const payerTransaction = await this.withdraw(paying.id, transaction);
-		const beneficiaryTransaction = await this.deposit(
-			beneficiary.id,
-			transaction,
-		);
+		const beneficiaryTransaction = await this.deposit(beneficiary.id, transaction);
 
 		const payerBalance = await this.accountService.getBalance(paying.id);
-		const beneficiaryBalance = await this.accountService.getBalance(
-			beneficiary.id,
-		);
+		const beneficiaryBalance = await this.accountService.getBalance(beneficiary.id);
 
 		return {
 			payer: { payerTransaction, payerBalance },

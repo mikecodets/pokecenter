@@ -5,15 +5,10 @@ import { INTERNAL_SERVER_ERROR } from "http-status";
 import { HttpErrorHandler } from "../../../../shared/middlewares/errors/http-error.handler";
 
 export class AccountController {
-	static async getBalance(
-		request: Request,
-		response: Response,
-	): Promise<Response<Account>> {
+	static async getBalance(request: Request, response: Response): Promise<Response<Account>> {
 		try {
 			const accountService = new AccountService();
-			const account = await accountService.getBalance(
-				request.params.customerId,
-			);
+			const account = await accountService.getBalance(request.params.customerId);
 
 			return response.status(200).json({
 				message: "🎉 balance retrieved successfully",

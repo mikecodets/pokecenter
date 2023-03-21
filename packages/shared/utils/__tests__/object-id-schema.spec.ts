@@ -15,15 +15,11 @@ describe("ObjectIdSchema", () => {
 		});
 
 		it("should return an error for an invalid object-id", async () => {
-			await expect(
-				objectIdSchema.validateObjectId("invalid-id"),
-			).rejects.toThrow("Error, expected a valid object-id");
+			await expect(objectIdSchema.validateObjectId("invalid-id")).rejects.toThrow("Error, expected a valid object-id");
 		});
 
 		it("should return an error for a null object-id", async () => {
-			await expect(objectIdSchema.validateObjectId(null)).rejects.toThrow(
-				"Error, expected a valid object-id",
-			);
+			await expect(objectIdSchema.validateObjectId(null)).rejects.toThrow("Error, expected a valid object-id");
 		});
 	});
 });

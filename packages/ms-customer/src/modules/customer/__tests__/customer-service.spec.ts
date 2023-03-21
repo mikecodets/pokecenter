@@ -1,10 +1,7 @@
 import { accountGeneratorMock } from "@workspace/ms-financial/src/modules/account/__tests__/mocks/account.generator";
 import { prismaMock } from "../../../../../shared/clients/prisma/singleton";
 import { CustomerService } from "../customer.service";
-import {
-	customerGeneratorMock,
-	customersGeneratorMock,
-} from "./mocks/customer.generator";
+import { customerGeneratorMock, customersGeneratorMock } from "./mocks/customer.generator";
 
 describe("Customer Service", () => {
 	let customerService: CustomerService;
@@ -17,18 +14,14 @@ describe("Customer Service", () => {
 		it("should not create customer when there is already another customer", async () => {
 			const customer = customerGeneratorMock(true);
 
-			await expect(customerService.create(customer)).rejects.toThrowError(
-				"The customer name field cannot be null",
-			);
+			await expect(customerService.create(customer)).rejects.toThrowError("The customer name field cannot be null");
 		});
 
 		it("should not create a customer when is duplicated", async () => {
 			const customer = customerGeneratorMock();
 
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
-			await expect(customerService.create(customer)).rejects.toThrow(
-				"This customer already exists in our system",
-			);
+			await expect(customerService.create(customer)).rejects.toThrow("This customer already exists in our system");
 		});
 
 		it("should create customer", async () => {
@@ -44,16 +37,12 @@ describe("Customer Service", () => {
 
 	describe("getById", () => {
 		it("should not find customer when the objectId is not valid", async () => {
-			await expect(
-				customerService.getById("object-id-not-valid"),
-			).rejects.toThrow("Error, expected a valid object-id");
+			await expect(customerService.getById("object-id-not-valid")).rejects.toThrow("Error, expected a valid object-id");
 		});
 
 		it("should not find customer when it does not exist", async () => {
 			const customer = customerGeneratorMock();
-			await expect(customerService.getById(customer.id)).rejects.toThrow(
-				"This customer does not exist in our system",
-			);
+			await expect(customerService.getById(customer.id)).rejects.toThrow("This customer does not exist in our system");
 		});
 
 		it("should find customer", async () => {
@@ -82,27 +71,27 @@ describe("Customer Service", () => {
 		it("should not update customer when it does not exist", async () => {
 			const customer = customerGeneratorMock();
 
-			await expect(
-				customerService.update(customer.id, customer),
-			).rejects.toThrow("This customer does not exist in our system");
+			await expect(customerService.update(customer.id, customer)).rejects.toThrow(
+				"This customer does not exist in our system",
+			);
 		});
 
 		it("should not create customer when there is already another customer", async () => {
 			const customer = customerGeneratorMock(true);
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
 
-			await expect(
-				customerService.update(customer.id, customer),
-			).rejects.toThrow("The customer name field cannot be null");
+			await expect(customerService.update(customer.id, customer)).rejects.toThrow(
+				"The customer name field cannot be null",
+			);
 		});
 
 		it("should not update customer when the objectId is not valid", async () => {
 			const customer = customerGeneratorMock();
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
 
-			await expect(
-				customerService.update("object-id-not-valid", customer),
-			).rejects.toThrow("Error, expected a valid object-id");
+			await expect(customerService.update("object-id-not-valid", customer)).rejects.toThrow(
+				"Error, expected a valid object-id",
+			);
 		});
 
 		it("should update customer", async () => {
@@ -120,15 +109,11 @@ describe("Customer Service", () => {
 		it("should not find customer when it does not exist", async () => {
 			const customer = customerGeneratorMock();
 
-			await expect(customerService.delete(customer.id)).rejects.toThrow(
-				"This customer does not exist in our system",
-			);
+			await expect(customerService.delete(customer.id)).rejects.toThrow("This customer does not exist in our system");
 		});
 
 		it("should not delete customer when the objectId is not valid", async () => {
-			await expect(
-				customerService.delete("object-id-not-valid"),
-			).rejects.toThrow("Error, expected a valid object-id");
+			await expect(customerService.delete("object-id-not-valid")).rejects.toThrow("Error, expected a valid object-id");
 		});
 
 		it("should not delete the customer when he still has a positive balance", async () => {

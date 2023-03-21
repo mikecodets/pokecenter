@@ -5,10 +5,7 @@ import { INTERNAL_SERVER_ERROR } from "http-status";
 import { HttpErrorHandler } from "../../../../shared/middlewares/errors/http-error.handler";
 
 export class CustomerController {
-	static async create(
-		request: Request,
-		response: Response,
-	): Promise<Response<Customer>> {
+	static async create(request: Request, response: Response): Promise<Response<Customer>> {
 		try {
 			const customerService = new CustomerService();
 			const customer = await customerService.create(request.body);
@@ -25,10 +22,7 @@ export class CustomerController {
 		}
 	}
 
-	static async getById(
-		request: Request,
-		response: Response,
-	): Promise<Response<Customer>> {
+	static async getById(request: Request, response: Response): Promise<Response<Customer>> {
 		try {
 			const customerService = new CustomerService();
 			const customer = await customerService.getById(request.params.customerId);
@@ -45,10 +39,7 @@ export class CustomerController {
 		}
 	}
 
-	static async getAll(
-		request: Request,
-		response: Response,
-	): Promise<Response<Customer[]>> {
+	static async getAll(request: Request, response: Response): Promise<Response<Customer[]>> {
 		try {
 			const customerService = new CustomerService();
 			const customers = await customerService.getAll();
@@ -65,16 +56,10 @@ export class CustomerController {
 		}
 	}
 
-	static async update(
-		request: Request,
-		response: Response,
-	): Promise<Response<Customer>> {
+	static async update(request: Request, response: Response): Promise<Response<Customer>> {
 		try {
 			const customerService = new CustomerService();
-			const customer = await customerService.update(
-				request.params.customerId,
-				request.body,
-			);
+			const customer = await customerService.update(request.params.customerId, request.body);
 
 			return response.status(200).json({
 				message: "🎉 customer updated successfully.",
@@ -88,10 +73,7 @@ export class CustomerController {
 		}
 	}
 
-	static async delete(
-		request: Request,
-		response: Response,
-	): Promise<Response<Customer>> {
+	static async delete(request: Request, response: Response): Promise<Response<Customer>> {
 		try {
 			const customerService = new CustomerService();
 			const customer = await customerService.delete(request.params.customerId);
