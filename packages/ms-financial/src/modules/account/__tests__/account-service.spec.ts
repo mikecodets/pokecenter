@@ -13,6 +13,7 @@ describe("Account service balance", () => {
 
 	beforeEach(() => {
 		accountService = new AccountService();
+		jest.clearAllMocks();
 	});
 
 	describe("getBalance", () => {
@@ -21,6 +22,7 @@ describe("Account service balance", () => {
 			const account = accountGeneratorMock();
 			customer.accountId = account.id;
 			const customerWithAccount = { ...customer, account };
+
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
 
 			await expect(accountService.getBalance(customer.id)).rejects.toThrowError("Account not found");
@@ -31,7 +33,9 @@ describe("Account service balance", () => {
 			const account = accountGeneratorMock();
 			customer.accountId = account.id;
 			const customerWithAccount = { ...customer, account };
+
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
+
 			prismaMock.account.findUnique.mockResolvedValue(account);
 
 			const getBalance = await accountService.getBalance(customer.id);
@@ -47,7 +51,9 @@ describe("Account service balance", () => {
 			customer.accountId = account.id;
 			account.balance = 1000;
 			const customerWithAccount = { ...customer, account };
+
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
+
 			const id = customer.id;
 			const amount = 500;
 			const balance = account.balance + amount;
@@ -65,11 +71,14 @@ describe("Account service balance", () => {
 			customer.accountId = account.id;
 			account.balance = 1000;
 			const customerWithAccount = { ...customer, account };
+
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
+
 			const id = customer.id;
 			const amount = 500;
 			const balance = account.balance - amount;
 			const type = AccountOperationType.DECREMENT;
+
 			prismaMock.account.update.mockResolvedValue({ ...account, balance });
 
 			const updateBalance = await accountService.updateBalance(id, amount, type);

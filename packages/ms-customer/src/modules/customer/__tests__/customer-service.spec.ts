@@ -8,6 +8,7 @@ describe("Customer Service", () => {
 
 	beforeEach(() => {
 		customerService = new CustomerService();
+		jest.clearAllMocks();
 	});
 
 	describe("create", () => {
@@ -21,12 +22,15 @@ describe("Customer Service", () => {
 			const customer = customerGeneratorMock();
 
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
+
 			await expect(customerService.create(customer)).rejects.toThrow("This customer already exists in our system");
 		});
 
 		it("should create customer", async () => {
 			const customer = customerGeneratorMock();
+
 			prismaMock.customer.create.mockResolvedValue(customer);
+
 			const create = await customerService.create(customer);
 
 			expect(create).not.toBeUndefined();
@@ -47,7 +51,9 @@ describe("Customer Service", () => {
 
 		it("should find customer", async () => {
 			const customer = customerGeneratorMock();
+
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
+
 			const getById = await customerService.getById(customer.id);
 
 			expect(getById).not.toBeUndefined();
@@ -59,7 +65,9 @@ describe("Customer Service", () => {
 	describe("getAll", () => {
 		it("should find all customers", async () => {
 			const customers = customersGeneratorMock();
+
 			prismaMock.customer.findMany.mockResolvedValue(customers);
+
 			const getAll = await customerService.getAll();
 
 			expect(getAll).not.toBeUndefined();
@@ -121,6 +129,7 @@ describe("Customer Service", () => {
 			const account = accountGeneratorMock();
 			customer.accountId = account.id;
 			const customerWithAccount = { ...customer, account: account };
+
 			prismaMock.customer.findUnique.mockResolvedValue(customerWithAccount);
 
 			await expect(customerService.delete(customer.id)).rejects.toThrow(
@@ -130,11 +139,11 @@ describe("Customer Service", () => {
 
 		it("should delete customer", async () => {
 			const customer = customerGeneratorMock();
+
 			prismaMock.customer.findUnique.mockResolvedValue(customer);
 			prismaMock.customer.delete.mockResolvedValue(customer);
-			const thisTest = await customerService.delete(customer.id);
 
-			expect(thisTest).toBeUndefined();
+			await expect(customerService.delete(customer.id)).resolves.toBeUndefined();
 		});
 	});
 });

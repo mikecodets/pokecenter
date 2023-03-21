@@ -42,13 +42,11 @@ describe("TransactionService", () => {
 		it("should withdraw money from account and create a transaction", async () => {
 			const customer = customerGeneratorMock();
 			const account = accountGeneratorMock();
-			const transaction = transactionGeneratorMock();
-
 			customer.accountId = account.id;
 			account.balance = 1000;
+			const transaction = transactionGeneratorMock();
 			transaction.customerId = customer.id;
 			transaction.amount = 500;
-
 			const customerWithAccount = { ...customer, account };
 
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
@@ -67,13 +65,11 @@ describe("TransactionService", () => {
 		it("should throw NotAcceptable error if the amount is greater than account balance", async () => {
 			const customer = customerGeneratorMock();
 			const account = accountGeneratorMock();
-			const transaction = transactionGeneratorMock();
-
 			customer.accountId = account.id;
-			account.balance = 200;
+			account.balance = 0;
+			const transaction = transactionGeneratorMock();
 			transaction.customerId = customer.id;
 			transaction.amount = 500;
-
 			const customerWithAccount = { ...customer, account };
 
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);

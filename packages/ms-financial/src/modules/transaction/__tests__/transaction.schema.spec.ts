@@ -5,25 +5,23 @@ describe("TransactionSchema", () => {
 
 	beforeEach(() => {
 		transactionSchema = new TransactionSchema();
+		jest.clearAllMocks();
 	});
 
 	describe("validateAmount", () => {
 		it("should return no errors for a valid amount", async () => {
-			const amount = 100;
-			const validateAmount = await transactionSchema.validateAmount(amount);
+			const validateAmount = await transactionSchema.validateAmount(100);
 			expect(validateAmount).toBe(undefined);
 		});
 
 		it("should return an error for a negative amount", async () => {
-			const amount = -50;
-			await expect(transactionSchema.validateAmount(amount)).rejects.toThrow(
+			await expect(transactionSchema.validateAmount(-50)).rejects.toThrow(
 				"The amount must be greater than or equal to R$ 0.1 cent to effect a transaction",
 			);
 		});
 
 		it("should return an error for a zero amount", async () => {
-			const amount = 0;
-			await expect(transactionSchema.validateAmount(amount)).rejects.toThrow(
+			await expect(transactionSchema.validateAmount(0)).rejects.toThrow(
 				"The amount must be greater than or equal to R$ 0.1 cent to effect a transaction",
 			);
 		});

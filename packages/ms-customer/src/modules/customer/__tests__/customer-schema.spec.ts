@@ -16,7 +16,6 @@ describe("CustomerSchema", () => {
 
 		it("should throw an error for a null name", async () => {
 			const name = null;
-
 			await expect(customerSchema.validateName(name)).rejects.toThrow("The customer name field cannot be null");
 		});
 	});
