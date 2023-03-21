@@ -1,6 +1,7 @@
+import "express-async-errors";
+
 import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
-import "express-async-errors";
 import morgan from "morgan";
 import path from "path";
 import { HttpErrorHandler } from "../../shared/middlewares/errors/http-error.handler";
@@ -46,9 +47,11 @@ export class App {
 	}
 
 	private setupErrorHandling() {
-		this.app.use((error: HttpErrorHandler, _request: Request, response: Response): Response => {
+		this.app.use((error: Error, _request: Request, response: Response, _next: NextFunction): Response => {
 			if (error instanceof HttpErrorHandler) {
-				return response.status(error.status).json({ error });
+				return response.status(error.status).json({
+					error: { name: error.name, message: error.message, status: error.status },
+				});
 			}
 
 			return response.json({ error: "⛔ error interno no servidor" });
