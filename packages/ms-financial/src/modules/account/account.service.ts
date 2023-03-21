@@ -29,20 +29,24 @@ export default class AccountService {
 		return account;
 	}
 
-	async updateBalance(customerId: string, amount: number, type: AccountOperationType): Promise<Account> {
+	async updateBalance(
+		customerId: string,
+		amount: number,
+		type: AccountOperationType,
+	): Promise<Account> {
 		const accountId = await this.getAccountId(customerId);
 
-		const data: AccountUpdateData = {};
+		const accountUpdateData: AccountUpdateData = {};
 
 		if (type === AccountOperationType.INCREMENT) {
-			data.increment = amount;
+			accountUpdateData.increment = amount;
 		} else if (type === AccountOperationType.DECREMENT) {
-			data.decrement = amount;
+			accountUpdateData.decrement = amount;
 		}
 
 		const updatedAccount = await this.prisma.account.update({
 			where: { id: accountId },
-			data: { balance: data },
+			data: { balance: accountUpdateData },
 		});
 
 		return updatedAccount;

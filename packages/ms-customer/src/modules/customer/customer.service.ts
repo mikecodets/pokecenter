@@ -65,10 +65,7 @@ export class CustomerService {
 
 		const { id } = await this.getById(customerId);
 
-		return await this.prisma.customer.update({
-			where: { id },
-			data: customer,
-		});
+		return await this.prisma.customer.update({ where: { id }, data: customer });
 	}
 
 	async delete(customerId: string): Promise<void> {

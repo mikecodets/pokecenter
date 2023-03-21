@@ -19,8 +19,17 @@ export default class Routes {
 		this.router.put("/customer/:customerId", CustomerController.update);
 		this.router.delete("/customer/:customerId", CustomerController.delete);
 		this.router.get("/balance/:customerId", AccountController.getBalance);
-		this.router.post("/transactions/deposit/:customerId", TransactionController.deposit);
-		this.router.post("/transactions/withdraw/:customerId", TransactionController.withdraw);
-		this.router.post("/transactions/transfer/:payingId/:receiverId", TransactionController.transfer);
+		this.router.post(
+			"/transactions/deposit/:customerId",
+			TransactionController.deposit,
+		);
+		this.router.post(
+			"/transactions/withdraw/:customerId",
+			TransactionController.withdraw,
+		);
+		this.router.post(
+			"/transactions/transfer/:payingId/:receiverId",
+			TransactionController.transfer,
+		);
 	}
 }

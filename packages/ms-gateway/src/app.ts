@@ -25,14 +25,22 @@ export class App {
 	}
 
 	private setupCorsHandling() {
-		this.app.use((_request: Request, response: Response, next: NextFunction): void => {
-			response.header("Access-Control-Allow-Origin", "*");
-			response.header("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type, Accept");
-			response.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, PATCH, OPTIONS");
+		this.app.use(
+			(_request: Request, response: Response, next: NextFunction): void => {
+				response.header("Access-Control-Allow-Origin", "*");
+				response.header(
+					"Access-Control-Allow-Headers",
+					"Authorization, Origin, X-Requested-With, Content-Type, Accept",
+				);
+				response.header(
+					"Access-Control-Allow-Methods",
+					"GET, PUT, POST, DELETE, PATCH, OPTIONS",
+				);
 
-			cors();
-			next();
-		});
+				cors();
+				next();
+			},
+		);
 	}
 
 	private setupMiddlewares() {
@@ -47,19 +55,32 @@ export class App {
 	}
 
 	private setupErrorHandling() {
-		this.app.use((error: Error, _request: Request, response: Response, _next: NextFunction): Response => {
-			if (error instanceof HttpErrorHandler) {
-				return response.status(error.status).json({
-					error: { name: error.name, message: error.message, status: error.status },
-				});
-			}
+		this.app.use(
+			(
+				error: Error,
+				_request: Request,
+				response: Response,
+				_next: NextFunction,
+			): Response => {
+				if (error instanceof HttpErrorHandler) {
+					return response.status(error.status).json({
+						error: {
+							name: error.name,
+							message: error.message,
+							status: error.status,
+						},
+					});
+				}
 
-			return response.json({ error: "⛔ error interno no servidor" });
-		});
+				return response.json({ error: "⛔ error interno no servidor" });
+			},
+		);
 	}
 
 	start() {
-		this.app.listen(this.port, () => console.log(`🎉 API is running on port ${this.port}`));
+		this.app.listen(this.port, () =>
+			console.log(`🎉 API is running on port ${this.port}`),
+		);
 	}
 }
 

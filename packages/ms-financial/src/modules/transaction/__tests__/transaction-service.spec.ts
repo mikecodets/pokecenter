@@ -27,12 +27,19 @@ describe("TransactionService", () => {
 			const customerWithAccount = { ...customer, account };
 			const transaction = transactionGeneratorMock();
 
-			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
-			mockedAccountService.prototype.updateBalance.mockResolvedValueOnce(account);
+			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
+				customerWithAccount,
+			);
+			mockedAccountService.prototype.updateBalance.mockResolvedValueOnce(
+				account,
+			);
 
 			prismaMock.transaction.create.mockResolvedValueOnce(transaction);
 
-			const deposit = await transactionService.deposit(customer.id, transaction);
+			const deposit = await transactionService.deposit(
+				customer.id,
+				transaction,
+			);
 
 			expect(deposit).toEqual(transaction);
 		});
@@ -49,13 +56,20 @@ describe("TransactionService", () => {
 			transaction.amount = 500;
 			const customerWithAccount = { ...customer, account };
 
-			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
+			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
+				customerWithAccount,
+			);
 			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(account);
-			mockedAccountService.prototype.updateBalance.mockResolvedValueOnce(account);
+			mockedAccountService.prototype.updateBalance.mockResolvedValueOnce(
+				account,
+			);
 
 			prismaMock.transaction.create.mockResolvedValue(transaction);
 
-			const withdraw = await transactionService.withdraw(customer.id, transaction);
+			const withdraw = await transactionService.withdraw(
+				customer.id,
+				transaction,
+			);
 
 			expect(withdraw.amount).toBe(transaction.amount);
 			expect(withdraw.methodPayment).toBe(transaction.methodPayment);
@@ -72,12 +86,16 @@ describe("TransactionService", () => {
 			transaction.amount = 500;
 			const customerWithAccount = { ...customer, account };
 
-			mockedCustomerService.prototype.getById.mockResolvedValueOnce(customerWithAccount);
+			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
+				customerWithAccount,
+			);
 			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(account);
 
 			prismaMock.transaction.create.mockResolvedValue(transaction);
 
-			await expect(transactionService.withdraw(customer.id, transaction)).rejects.toThrow(
+			await expect(
+				transactionService.withdraw(customer.id, transaction),
+			).rejects.toThrow(
 				"The amount is greater than your account balance, please review your balance and redo the transaction",
 			);
 		});
@@ -90,16 +108,18 @@ describe("TransactionService", () => {
 			const transaction = transactionGeneratorMock();
 			transaction.amount = -50;
 
-			await expect(transactionService.transfer(paying.id, beneficiary.id, transaction)).rejects.toThrow();
+			await expect(
+				transactionService.transfer(paying.id, beneficiary.id, transaction),
+			).rejects.toThrow();
 		});
 
 		it("should reject self transfer", async () => {
 			const customer = customerGeneratorMock();
 			const transaction = transactionGeneratorMock();
 			transaction.customerId = customer.id;
-			await expect(transactionService.transfer(customer.id, customer.id, transaction)).rejects.toThrowError(
-				"It is not possible to perform a self transfer",
-			);
+			await expect(
+				transactionService.transfer(customer.id, customer.id, transaction),
+			).rejects.toThrowError("It is not possible to perform a self transfer");
 		});
 
 		it("should withdraw from payer and deposit to beneficiary", async () => {
@@ -115,29 +135,39 @@ describe("TransactionService", () => {
 			beneficiary.accountId = accountBeneficiary.id;
 			const beneficiaryWithAccount = { ...paying, account: accountBeneficiary };
 
-			mockedCustomerService.prototype.getById.mockResolvedValueOnce(payingWithAccount);
-			mockedCustomerService.prototype.getById.mockResolvedValueOnce(beneficiaryWithAccount);
+			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
+				payingWithAccount,
+			);
+			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
+				beneficiaryWithAccount,
+			);
 
-			jest.spyOn(TransactionService.prototype, "deposit").mockResolvedValue(transaction);
-			jest.spyOn(TransactionService.prototype, "withdraw").mockResolvedValue(transaction);
+			jest
+				.spyOn(TransactionService.prototype, "deposit")
+				.mockResolvedValue(transaction);
+			jest
+				.spyOn(TransactionService.prototype, "withdraw")
+				.mockResolvedValue(transaction);
 
-			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(accountPaying);
-			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(accountBeneficiary);
+			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(
+				accountPaying,
+			);
+			mockedAccountService.prototype.getBalance.mockResolvedValueOnce(
+				accountBeneficiary,
+			);
 
 			const payingId = paying.id;
 			const beneficiaryId = beneficiary.id;
 
-			const transfer = await transactionService.transfer(payingId, beneficiaryId, transaction);
+			const transfer = await transactionService.transfer(
+				payingId,
+				beneficiaryId,
+				transaction,
+			);
 
 			expect(transfer).toMatchObject({
-				payer: {
-					payerTransaction: transaction,
-					payerBalance: accountPaying,
-				},
-				beneficiary: {
-					beneficiaryTransaction: transaction,
-					beneficiaryBalance: accountBeneficiary,
-				},
+				paying: { transaction, account: accountPaying },
+				beneficiary: { transaction, account: accountBeneficiary },
 			});
 		});
 	});

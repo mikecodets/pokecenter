@@ -1,5 +1,9 @@
 import { faker } from "@faker-js/faker";
-import { Transaction, TransactionMethodPayment, TransactionOperation } from "@prisma/client";
+import {
+	Transaction,
+	TransactionMethodPayment,
+	TransactionOperation,
+} from "@prisma/client";
 
 export function transactionGeneratorMock(): Transaction {
 	const transactionMethodPayment = Object.values(TransactionMethodPayment);

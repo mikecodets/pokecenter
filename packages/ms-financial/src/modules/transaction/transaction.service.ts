@@ -18,7 +18,10 @@ export default class TransactionService {
 		this.accountService = new AccountService();
 	}
 
-	async deposit(customerId: string, transaction: Transaction): Promise<Transaction> {
+	async deposit(
+		customerId: string,
+		transaction: Transaction,
+	): Promise<Transaction> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		const customer = await this.customerService.getById(customerId);
@@ -38,7 +41,10 @@ export default class TransactionService {
 		});
 	}
 
-	async withdraw(customerId: string, transaction: Transaction): Promise<Transaction> {
+	async withdraw(
+		customerId: string,
+		transaction: Transaction,
+	): Promise<Transaction> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		const customer = await this.customerService.getById(customerId);
@@ -66,7 +72,11 @@ export default class TransactionService {
 		});
 	}
 
-	async transfer(payingId: string, beneficiaryId: string, transaction: Transaction): Promise<TransactionTransfer> {
+	async transfer(
+		payingId: string,
+		beneficiaryId: string,
+		transaction: Transaction,
+	): Promise<TransactionTransfer> {
 		await this.transactionSchema.validateAmount(transaction.amount);
 
 		if (payingId === beneficiaryId) {
@@ -76,15 +86,23 @@ export default class TransactionService {
 		const paying = await this.customerService.getById(payingId);
 		const beneficiary = await this.customerService.getById(beneficiaryId);
 
-		const payerTransaction = await this.withdraw(paying.id, transaction);
-		const beneficiaryTransaction = await this.deposit(beneficiary.id, transaction);
+		const payingTransaction = await this.withdraw(paying.id, transaction);
+		const beneficiaryTransaction = await this.deposit(
+			beneficiary.id,
+			transaction,
+		);
 
-		const payerBalance = await this.accountService.getBalance(paying.id);
-		const beneficiaryBalance = await this.accountService.getBalance(beneficiary.id);
+		const payingAccount = await this.accountService.getBalance(paying.id);
+		const beneficiaryAccount = await this.accountService.getBalance(
+			beneficiary.id,
+		);
 
 		return {
-			payer: { payerTransaction, payerBalance },
-			beneficiary: { beneficiaryTransaction, beneficiaryBalance },
+			paying: { transaction: payingTransaction, account: payingAccount },
+			beneficiary: {
+				transaction: beneficiaryTransaction,
+				account: beneficiaryAccount,
+			},
 		};
 	}
 }

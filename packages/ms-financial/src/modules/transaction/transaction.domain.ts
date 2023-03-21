@@ -1,12 +1,12 @@
 import { Account, Transaction } from "@prisma/client";
 
 export type TransactionTransfer = {
-	payer: {
-		payerTransaction: Transaction;
-		payerBalance: Account;
+	paying: {
+		transaction: Transaction;
+		account: Account;
 	};
 	beneficiary: {
-		beneficiaryTransaction: Transaction;
-		beneficiaryBalance: Account;
+		transaction: Transaction;
+		account: Account;
 	};
 };
