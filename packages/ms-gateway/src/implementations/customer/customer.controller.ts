@@ -1,7 +1,6 @@
 import { Customer } from "@prisma/client";
 import CustomerService from "@workspace/ms-customer";
 import { Request, Response } from "express";
-import { INTERNAL_SERVER_ERROR } from "http-status";
 import { HttpErrorHandler } from "../../../../shared/middlewares/errors/http-error.handler";
 
 export class CustomerController {
@@ -16,7 +15,7 @@ export class CustomerController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -33,7 +32,7 @@ export class CustomerController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -50,7 +49,7 @@ export class CustomerController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -67,7 +66,7 @@ export class CustomerController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -84,7 +83,7 @@ export class CustomerController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}

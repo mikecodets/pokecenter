@@ -1,7 +1,6 @@
 import { Transaction } from "@prisma/client";
 import { TransactionService, TransactionTransfer } from "@workspace/ms-financial";
 import { Request, Response } from "express";
-import { INTERNAL_SERVER_ERROR } from "http-status";
 import { HttpErrorHandler } from "../../../../shared/middlewares/errors/http-error.handler";
 
 export class TransactionController {
@@ -18,7 +17,7 @@ export class TransactionController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -37,7 +36,7 @@ export class TransactionController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
@@ -57,7 +56,7 @@ export class TransactionController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}

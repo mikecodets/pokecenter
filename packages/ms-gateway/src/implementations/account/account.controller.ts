@@ -1,7 +1,6 @@
 import { Account } from "@prisma/client";
 import AccountService from "@workspace/ms-financial/src/modules/account/account.service";
 import { Request, Response } from "express";
-import { INTERNAL_SERVER_ERROR } from "http-status";
 import { HttpErrorHandler } from "../../../../shared/middlewares/errors/http-error.handler";
 
 export class AccountController {
@@ -16,7 +15,7 @@ export class AccountController {
 			});
 		} catch (error) {
 			const { name, message, status } = error as unknown as HttpErrorHandler;
-			return response.status(INTERNAL_SERVER_ERROR).json({
+			return response.status(status).json({
 				error: { name, message, status },
 			});
 		}
