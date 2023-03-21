@@ -11,6 +11,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionMethodPayment {
+  DEBIT
+  CREDIT
+  PIX
+  BOLETO
+}
+
+enum TransactionOperation {
+  DEPOSIT
+  WITHDRAW
+}
+
 model Customer {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String        @unique
@@ -39,16 +51,4 @@ model Transaction {
   updatedAt     DateTime                 @updatedAt
   Customer      Customer?                @relation(fields: [customerId], references: [id])
   customerId    String?                  @db.ObjectId
-}
-
-enum TransactionMethodPayment {
-  DEBIT
-  CREDIT
-  PIX
-  BOLETO
-}
-
-enum TransactionOperation {
-  DEPOSIT
-  WITHDRAW
 }

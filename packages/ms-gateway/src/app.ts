@@ -3,23 +3,27 @@ import express, { Application, NextFunction, Request, Response } from "express";
 import "express-async-errors";
 import morgan from "morgan";
 import path from "path";
-import {
-	HttpErrorHandler,
-	HttpErrorHandlerType
-} from "../../../shared/errors/httpErrorHandler";
+import { HttpErrorHandler } from "../../shared/middlewares/errors/http-error.handler";
 import { API_PORT } from "./config";
-import { Routes } from "./core/routes";
+import Routes from "./core/routes";
 
 export class App {
-	public app: Application;
-	public port: number;
-	public routes: Routes;
+	app: Application;
+	port: number;
+	routes: Routes;
 
 	constructor() {
 		this.app = express();
 		this.port = API_PORT;
 		this.routes = new Routes();
 
+		this.setupCorsHandling();
+		this.setupMiddlewares();
+		this.setupRoutes();
+		this.setupErrorHandling();
+	}
+
+	private setupCorsHandling() {
 		this.app.use(
 			(_request: Request, response: Response, next: NextFunction): void => {
 				response.header("Access-Control-Allow-Origin", "*");
@@ -36,42 +40,40 @@ export class App {
 				next();
 			},
 		);
+	}
 
+	private setupMiddlewares() {
 		this.app.use(morgan("dev"));
-		this.app.use(
-			express.static(path.join(__dirname, "..", "..", "..", "docs")),
-		);
+		this.app.use(express.static(path.join(path.resolve("..", "..", "docs"))));
 		this.app.use(express.json({ limit: "1mb" }));
 		this.app.use(express.urlencoded({ extended: true }));
+	}
 
-		this.app.use("/v1", this.routes.firstVersion);
+	private setupRoutes() {
+		this.app.use("/api", this.routes.router);
+	}
 
+	private setupErrorHandling() {
 		this.app.use(
 			(
-				error: Error,
+				error: HttpErrorHandler,
 				_request: Request,
 				response: Response,
-				_next: NextFunction,
-			): Response<Error> => {
-				if (error instanceof Error) {
-					const { message, status }: HttpErrorHandlerType =
-						HttpErrorHandler.errorParser(error);
-
-					return response.status(status).json({
-						error: message,
-					});
+			): Response => {
+				if (error instanceof HttpErrorHandler) {
+					return response.status(error.status).json({ error });
 				}
 
-				return response.json({
-					error: "Error interno no servidor",
-				});
+				return response.json({ error: "⛔ error interno no servidor" });
 			},
 		);
+	}
 
+	start() {
 		this.app.listen(this.port, () =>
-			console.info(`🎉 API is running on port ${this.port}`),
+			console.log(`🎉 API is running on port ${this.port}`),
 		);
 	}
 }
 
-new App();
+new App().start();

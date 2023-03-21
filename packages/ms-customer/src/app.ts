@@ -1,3 +1,2 @@
 import { CustomerService } from "./modules/customer/customer.service";
-
-export { CustomerService };
+export default CustomerService;

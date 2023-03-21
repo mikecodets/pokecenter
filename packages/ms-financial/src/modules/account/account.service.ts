@@ -1,92 +1,60 @@
-import { Account } from "@prisma/client";
-import { CustomerService } from "@workspace/ms-customer";
-import objectid from "validate-objectid";
-import { HttpErrorHandler } from "../../../../../shared/errors/httpErrorHandler";
-import prisma from "../../client";
+import { Account, PrismaClient } from "@prisma/client";
+import CustomerService from "@workspace/ms-customer";
+import prisma from "../../../../shared/clients/prisma/client";
+import { NotFound } from "../../../../shared/middlewares/errors/usecases/not-found";
+
+import { AccountUpdateData } from "./account.domain";
 import { AccountOperationType } from "./account.enum";
 
-export class AccountService {
-	public static async balance(customerId: string): Promise<Account> {
-		if (!objectid(customerId)) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Error, expected a valid object-id",
-					status: 400,
-				}),
-			);
-		}
+export default class AccountService {
+	private readonly prisma: PrismaClient;
+	private readonly customerService: CustomerService;
 
-		const { accountId } = await CustomerService.find(customerId);
-
-		const hasAccount = await prisma.account.findUnique({
-			where: {
-				id: accountId,
-			},
-		});
-
-		if (!hasAccount) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Customer does not have account",
-					status: 404,
-				}),
-			);
-		}
-
-		return hasAccount;
+	constructor() {
+		this.prisma = prisma;
+		this.customerService = new CustomerService();
 	}
 
-	public static async update(
+	async getBalance(customerId: string): Promise<Account> {
+		const accountId = await this.getAccountId(customerId);
+
+		const account = await this.prisma.account.findUnique({
+			where: { id: accountId },
+		});
+
+		if (!account) {
+			throw new NotFound("Account not found");
+		}
+
+		return account;
+	}
+
+	async updateBalance(
 		customerId: string,
 		amount: number,
 		type: AccountOperationType,
-	): Promise<Account | undefined> {
-		if (!objectid(customerId)) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Error, expected a valid object-id",
-					status: 400,
-				}),
-			);
+	): Promise<Account> {
+		const accountId = await this.getAccountId(customerId);
+
+		const data: AccountUpdateData = {};
+
+		if (type === AccountOperationType.INCREMENT) {
+			data.increment = amount;
+		} else if (type === AccountOperationType.DECREMENT) {
+			data.decrement = amount;
 		}
 
-		const { accountId } = await CustomerService.find(customerId);
-
-		const hasAccount = await prisma.account.findUnique({
-			where: {
-				id: accountId,
-			},
+		const updatedAccount = await this.prisma.account.update({
+			where: { id: accountId },
+			data: { balance: data },
 		});
 
-		if (!hasAccount) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Customer does not have account",
-					status: 404,
-				}),
-			);
-		}
+		return updatedAccount;
+	}
 
-		const { INCREMENT, DECREMENT } = AccountOperationType;
+	private async getAccountId(customerId: string): Promise<string> {
+		const customer = await this.customerService.getById(customerId);
 
-		if (type === INCREMENT) {
-			return await prisma.account.update({
-				where: {
-					id: hasAccount.id,
-				},
-				data: {
-					balance: { increment: amount },
-				},
-			});
-		} else if (type === DECREMENT) {
-			return await prisma.account.update({
-				where: {
-					id: hasAccount.id,
-				},
-				data: {
-					balance: { decrement: amount },
-				},
-			});
-		}
+		return customer.accountId;
 	}
 }

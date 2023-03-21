@@ -1,164 +1,108 @@
 import { Transaction, TransactionOperation } from "@prisma/client";
-import { CustomerService } from "@workspace/ms-customer";
-import objectid from "validate-objectid";
-import { HttpErrorHandler } from "../../../../../shared/errors/httpErrorHandler";
-import prisma from "../../client";
+import CustomerService from "@workspace/ms-customer";
+import prisma from "../../../../shared/clients/prisma/client";
+import { NotAcceptable } from "../../../../shared/middlewares/errors/usecases/not-acceptable";
+import ObjectIdSchema from "../../../../shared/utils/object-id.schema";
 import { AccountOperationType } from "../account/account.enum";
-import { AccountService } from "../account/account.service";
-import { TransactionTransfer } from "./transaction.types";
+import AccountService from "../account/account.service";
+import { TransactionTransfer } from "./transaction.domain";
+import TransactionSchema from "./transaction.schema";
 
-export class TransactionService {
-	public static async deposit(
+export default class TransactionService {
+	private readonly objectIdSchema: ObjectIdSchema;
+	private readonly transactionSchema: TransactionSchema;
+	private readonly customerService: CustomerService;
+	private readonly accountService: AccountService;
+
+	constructor() {
+		this.objectIdSchema = new ObjectIdSchema();
+		this.transactionSchema = new TransactionSchema();
+		this.customerService = new CustomerService();
+		this.accountService = new AccountService();
+	}
+
+	async deposit(
 		customerId: string,
 		transaction: Transaction,
 	): Promise<Transaction> {
-		if (!objectid(customerId)) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Error, expected a valid object-id",
-					status: 400,
-				}),
-			);
-		}
+		await this.transactionSchema.validateAmount(transaction.amount);
 
-		if (transaction.amount <= 0) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message:
-						"The amount must be greater than or equal to R$ 0.1 cent to effect a transaction",
-					status: 400,
-				}),
-			);
-		}
+		const customer = await this.customerService.getById(customerId);
+		const id = customer.id;
+		const amount = transaction.amount;
+		const type = AccountOperationType.INCREMENT;
 
-		const customer = await CustomerService.find(customerId);
-
-		const { INCREMENT } = AccountOperationType;
-
-		await AccountService.update(customer.id, transaction.amount, INCREMENT);
-
-		const { DEPOSIT } = TransactionOperation;
+		await this.accountService.updateBalance(id, amount, type);
 
 		return await prisma.transaction.create({
 			data: {
 				amount: transaction.amount,
 				methodPayment: transaction.methodPayment,
-				operation: DEPOSIT,
+				operation: TransactionOperation.DEPOSIT,
 				customerId: customer.id,
 			},
 		});
 	}
 
-	public static async withdraw(
+	async withdraw(
 		customerId: string,
 		transaction: Transaction,
 	): Promise<Transaction> {
-		if (!objectid(customerId)) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Error, expected a valid object-id",
-					status: 400,
-				}),
-			);
-		}
+		await this.transactionSchema.validateAmount(transaction.amount);
 
-		if (transaction.amount <= 0) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message:
-						"The amount must be greater than or equal to R$ 0.1 cent to effect a transaction",
-					status: 400,
-				}),
-			);
-		}
-
-		const customer = await CustomerService.find(customerId);
-		const account = await AccountService.balance(customer.id);
+		const customer = await this.customerService.getById(customerId);
+		const account = await this.accountService.getBalance(customer.id);
 
 		if (transaction.amount > account.balance) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message:
-						"The amount is greater than your account balance, please review your balance and redo the transaction",
-					status: 400,
-				}),
+			throw new NotAcceptable(
+				"The amount is greater than your account balance, please review your balance and redo the transaction",
 			);
 		}
 
-		const { DECREMENT } = AccountOperationType;
+		const id = customer.id;
+		const amount = transaction.amount;
+		const type = AccountOperationType.DECREMENT;
 
-		await AccountService.update(customer.id, transaction.amount, DECREMENT);
-
-		const { WITHDRAW } = TransactionOperation;
+		await this.accountService.updateBalance(id, amount, type);
 
 		return await prisma.transaction.create({
 			data: {
 				amount: transaction.amount,
 				methodPayment: transaction.methodPayment,
-				operation: WITHDRAW,
+				operation: TransactionOperation.WITHDRAW,
 				customerId: customer.id,
 			},
 		});
 	}
 
-	public static async transfer(
+	async transfer(
 		payingId: string,
 		beneficiaryId: string,
 		transaction: Transaction,
 	): Promise<TransactionTransfer> {
-		if (!objectid(payingId) || !objectid(beneficiaryId)) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "Error, expected a valid object-id",
-					status: 400,
-				}),
-			);
-		}
+		await this.transactionSchema.validateAmount(transaction.amount);
 
 		if (payingId === beneficiaryId) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message: "It is not possible to perform a self transfer",
-					status: 400,
-				}),
-			);
+			throw new NotAcceptable("It is not possible to perform a self transfer");
 		}
 
-		if (transaction.amount <= 0) {
-			throw new Error(
-				HttpErrorHandler.targetError({
-					message:
-						"The amount must be greater than or equal to R$ 0.1 cent to effect a transaction",
-					status: 400,
-				}),
-			);
-		}
+		const paying = await this.customerService.getById(payingId);
+		const beneficiary = await this.customerService.getById(beneficiaryId);
 
-		const paying = await CustomerService.find(payingId);
-		const beneficiary = await CustomerService.find(beneficiaryId);
-
-		const payerTransaction = await TransactionService.withdraw(
-			paying.id,
-			transaction,
-		);
-
-		const beneficiaryTransaction = await TransactionService.deposit(
+		const payerTransaction = await this.withdraw(paying.id, transaction);
+		const beneficiaryTransaction = await this.deposit(
 			beneficiary.id,
 			transaction,
 		);
 
-		const payerBalance = await AccountService.balance(paying.id);
-		const beneficiaryBalance = await AccountService.balance(beneficiary.id);
+		const payerBalance = await this.accountService.getBalance(paying.id);
+		const beneficiaryBalance = await this.accountService.getBalance(
+			beneficiary.id,
+		);
 
 		return {
-			payer: {
-				payerTransaction,
-				payerBalance,
-			},
-			beneficiary: {
-				beneficiaryTransaction,
-				beneficiaryBalance,
-			},
+			payer: { payerTransaction, payerBalance },
+			beneficiary: { beneficiaryTransaction, beneficiaryBalance },
 		};
 	}
 }

@@ -1,35 +1,36 @@
 import { Router } from "express";
-import { AccountController } from "../../implementation/account/account.controller";
-import { CustomerController } from "../../implementation/customer/customer.controller";
-import { TransactionController } from "../../implementation/transaction/transaction.controller";
+import { AccountController } from "../../implementations/account/account.controller";
+import { CustomerController } from "../../implementations/customer/customer.controller";
+import { TransactionController } from "../../implementations/transaction/transaction.controller";
 
-export class Routes {
-	public firstVersion: Router;
+export default class Routes {
+	public readonly router: Router;
 
 	constructor() {
-		this.firstVersion = Router();
+		this.router = Router();
 
-		this.firstVersion.post("/customer", CustomerController.create);
-		this.firstVersion.get("/customer/:customerId", CustomerController.find);
-		this.firstVersion.get("/customer/", CustomerController.findAll);
-		this.firstVersion.put("/customer/:customerId", CustomerController.update);
-		this.firstVersion.delete(
-			"/customer/:customerId",
-			CustomerController.delete,
-		);
+		this.initializeRoutes();
+	}
 
-		this.firstVersion.get("/balance/:customerId", AccountController.balance);
+	private initializeRoutes(): void {
+		this.router.post("/customer", CustomerController.create);
+		this.router.get("/customer/:customerId", CustomerController.getById);
+		this.router.get("/customers", CustomerController.getAll);
+		this.router.put("/customer/:customerId", CustomerController.update);
+		this.router.delete("/customer/:customerId", CustomerController.delete);
 
-		this.firstVersion.post(
-			"/transaction/deposit/:customerId",
+		this.router.get("/balance/:customerId", AccountController.getBalance);
+
+		this.router.post(
+			"/transactions/deposit/:customerId",
 			TransactionController.deposit,
 		);
-		this.firstVersion.post(
-			"/transaction/withdraw/:customerId",
+		this.router.post(
+			"/transactions/withdraw/:customerId",
 			TransactionController.withdraw,
 		);
-		this.firstVersion.post(
-			"/transaction/transfer/:payingId/:receiverId",
+		this.router.post(
+			"/transactions/transfer/:payingId/:receiverId",
 			TransactionController.transfer,
 		);
 	}
