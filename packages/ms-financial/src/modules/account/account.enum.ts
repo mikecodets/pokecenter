@@ -1,4 +1,4 @@
-export enum AccountOperationType {
+export enum AccountOperationEnum {
 	INCREMENT = "INCREMENT",
 	DECREMENT = "DECREMENT",
 }

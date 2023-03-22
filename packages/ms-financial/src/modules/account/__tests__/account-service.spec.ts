@@ -1,7 +1,7 @@
 import CustomerService from "@workspace/ms-customer";
 import { customerGeneratorMock } from "@workspace/ms-customer/src/modules/customer/__tests__/mocks/customer.generator";
 import { prismaMock } from "../../../../../shared/clients/prisma/singleton";
-import { AccountOperationType } from "../account.enum";
+import { AccountOperationEnum } from "../account.enum";
 import AccountService from "../account.service";
 import { accountGeneratorMock } from "./mocks/account.generator";
 
@@ -65,14 +65,14 @@ describe("Account service balance", () => {
 			const id = customer.id;
 			const amount = 500;
 			const balance = account.balance + amount;
-			const type = AccountOperationType.INCREMENT;
+			const type = AccountOperationEnum.INCREMENT;
 			prismaMock.account.update.mockResolvedValue({ ...account, balance });
 
-			const updateBalance = await accountService.updateBalance(
-				id,
+			const updateBalance = await accountService.updateBalance({
+				customerId: id,
 				amount,
 				type,
-			);
+			});
 
 			expect(updateBalance.balance).toEqual(balance);
 		});
@@ -91,15 +91,15 @@ describe("Account service balance", () => {
 			const id = customer.id;
 			const amount = 500;
 			const balance = account.balance - amount;
-			const type = AccountOperationType.DECREMENT;
+			const type = AccountOperationEnum.DECREMENT;
 
 			prismaMock.account.update.mockResolvedValue({ ...account, balance });
 
-			const updateBalance = await accountService.updateBalance(
-				id,
+			const updateBalance = await accountService.updateBalance({
+				customerId: id,
 				amount,
 				type,
-			);
+			});
 
 			expect(updateBalance.balance).toEqual(balance);
 		});

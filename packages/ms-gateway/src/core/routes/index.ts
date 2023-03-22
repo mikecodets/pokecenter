@@ -20,15 +20,15 @@ export default class Routes {
 		this.router.delete("/customer/:customerId", CustomerController.delete);
 		this.router.get("/balance/:customerId", AccountController.getBalance);
 		this.router.post(
-			"/transactions/deposit/:customerId",
+			"/transaction/deposit/:customerId",
 			TransactionController.deposit,
 		);
 		this.router.post(
-			"/transactions/withdraw/:customerId",
+			"/transaction/withdraw/:customerId",
 			TransactionController.withdraw,
 		);
 		this.router.post(
-			"/transactions/transfer/:payingId/:receiverId",
+			"/transaction/transfer/:payerId/:receiverId",
 			TransactionController.transfer,
 		);
 	}

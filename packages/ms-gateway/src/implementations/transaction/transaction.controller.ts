@@ -13,10 +13,10 @@ export class TransactionController {
 		const customerId = request.params.customerId;
 		const depositData = request.body;
 		const transactionService = new TransactionService();
-		const transaction = await transactionService.deposit(
+		const transaction = await transactionService.deposit({
 			customerId,
-			depositData,
-		);
+			transaction: depositData,
+		});
 
 		return response.status(200).json({
 			message: "🎉 deposit made successfully",
@@ -31,10 +31,10 @@ export class TransactionController {
 		const customerId = request.params.customerId;
 		const withdrawalData = request.body;
 		const transactionService = new TransactionService();
-		const transaction = await transactionService.withdraw(
-			customerId,
-			withdrawalData,
-		);
+		const transaction = await transactionService.withdraw({
+			customerId: customerId,
+			transaction: withdrawalData,
+		});
 
 		return response.status(200).json({
 			message: "🎉 withdrawal successful",
@@ -46,15 +46,15 @@ export class TransactionController {
 		request: Request,
 		response: Response,
 	): Promise<Response<TransactionTransfer>> {
-		const payingId = request.params.payingId;
+		const payerId = request.params.payerId;
 		const receiverId = request.params.receiverId;
 		const transferData = request.body;
 		const transactionService = new TransactionService();
-		const transaction = await transactionService.transfer(
-			payingId,
+		const transaction = await transactionService.transfer({
+			payerId,
 			receiverId,
-			transferData,
-		);
+			transaction: transferData,
+		});
 
 		return response.status(200).json({
 			message: "🎉 transfer successful",

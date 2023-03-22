@@ -2,9 +2,14 @@ import { Transaction, TransactionOperation } from "@prisma/client";
 import CustomerService from "@workspace/ms-customer";
 import prisma from "../../../../shared/clients/prisma/client";
 import { NotAcceptable } from "../../../../shared/middlewares/errors/usecases/not-acceptable";
-import { AccountOperationType } from "../account/account.enum";
+import { AccountOperationEnum } from "../account/account.enum";
 import AccountService from "../account/account.service";
-import { TransactionTransfer } from "./transaction.domain";
+import {
+	Deposit,
+	TransactionTransfer,
+	Transfer,
+	Withdraw,
+} from "./transaction.domain";
 import TransactionSchema from "./transaction.schema";
 
 export default class TransactionService {
@@ -18,90 +23,86 @@ export default class TransactionService {
 		this.accountService = new AccountService();
 	}
 
-	async deposit(
-		customerId: string,
-		transaction: Transaction,
-	): Promise<Transaction> {
-		await this.transactionSchema.validateAmount(transaction.amount);
+	async deposit(data: Deposit): Promise<Transaction> {
+		await this.transactionSchema.validateAmount(data.transaction.amount);
 
-		const customer = await this.customerService.getById(customerId);
-		const id = customer.id;
-		const amount = transaction.amount;
-		const type = AccountOperationType.INCREMENT;
+		const customer = await this.customerService.getById(data.customerId);
 
-		await this.accountService.updateBalance(id, amount, type);
+		const customerId = customer.id;
+		const amount = data.transaction.amount;
+		const type = AccountOperationEnum.INCREMENT;
+
+		await this.accountService.updateBalance({ customerId, amount, type });
 
 		return await prisma.transaction.create({
 			data: {
-				amount: transaction.amount,
-				methodPayment: transaction.methodPayment,
+				amount,
+				methodPayment: data.transaction.methodPayment,
 				operation: TransactionOperation.DEPOSIT,
-				customerId: customer.id,
+				customerId,
 			},
 		});
 	}
 
-	async withdraw(
-		customerId: string,
-		transaction: Transaction,
-	): Promise<Transaction> {
-		await this.transactionSchema.validateAmount(transaction.amount);
+	async withdraw(data: Withdraw): Promise<Transaction> {
+		await this.transactionSchema.validateAmount(data.transaction.amount);
 
-		const customer = await this.customerService.getById(customerId);
+		const customer = await this.customerService.getById(data.customerId);
 		const account = await this.accountService.getBalance(customer.id);
 
-		if (transaction.amount > account.balance) {
+		if (data.transaction.amount > account.balance) {
 			throw new NotAcceptable(
 				"The amount is greater than your account balance, please review your balance and redo the transaction",
 			);
 		}
 
-		const id = customer.id;
-		const amount = transaction.amount;
-		const type = AccountOperationType.DECREMENT;
+		const customerId = customer.id;
+		const amount = data.transaction.amount;
+		const type = AccountOperationEnum.DECREMENT;
 
-		await this.accountService.updateBalance(id, amount, type);
+		await this.accountService.updateBalance({ customerId, amount, type });
 
 		return await prisma.transaction.create({
 			data: {
-				amount: transaction.amount,
-				methodPayment: transaction.methodPayment,
+				amount,
+				methodPayment: data.transaction.methodPayment,
 				operation: TransactionOperation.WITHDRAW,
-				customerId: customer.id,
+				customerId,
 			},
 		});
 	}
 
-	async transfer(
-		payingId: string,
-		beneficiaryId: string,
-		transaction: Transaction,
-	): Promise<TransactionTransfer> {
-		await this.transactionSchema.validateAmount(transaction.amount);
+	async transfer(data: Transfer): Promise<TransactionTransfer> {
+		await this.transactionSchema.validateAmount(data.transaction.amount);
 
-		if (payingId === beneficiaryId) {
+		if (data.payerId === data.receiverId) {
 			throw new NotAcceptable("It is not possible to perform a self transfer");
 		}
 
-		const paying = await this.customerService.getById(payingId);
-		const beneficiary = await this.customerService.getById(beneficiaryId);
+		const payer = await this.customerService.getById(data.payerId);
+		const receiver = await this.customerService.getById(data.receiverId);
 
-		const payingTransaction = await this.withdraw(paying.id, transaction);
-		const beneficiaryTransaction = await this.deposit(
-			beneficiary.id,
-			transaction,
-		);
+		const payerTransaction = await this.withdraw({
+			customerId: payer.id,
+			transaction: data.transaction,
+		});
 
-		const payingAccount = await this.accountService.getBalance(paying.id);
-		const beneficiaryAccount = await this.accountService.getBalance(
-			beneficiary.id,
-		);
+		const receiverTransaction = await this.deposit({
+			customerId: receiver.id,
+			transaction: data.transaction,
+		});
+
+		const payerAccount = await this.accountService.getBalance(payer.id);
+		const receiverAccount = await this.accountService.getBalance(receiver.id);
 
 		return {
-			paying: { transaction: payingTransaction, account: payingAccount },
-			beneficiary: {
-				transaction: beneficiaryTransaction,
-				account: beneficiaryAccount,
+			payer: {
+				transaction: payerTransaction,
+				account: payerAccount,
+			},
+			receiver: {
+				transaction: receiverTransaction,
+				account: receiverAccount,
 			},
 		};
 	}

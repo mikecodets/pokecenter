@@ -3,8 +3,8 @@ import CustomerService from "@workspace/ms-customer";
 import prisma from "../../../../shared/clients/prisma/client";
 import { NotFound } from "../../../../shared/middlewares/errors/usecases/not-found";
 
-import { AccountUpdateData } from "./account.domain";
-import { AccountOperationType } from "./account.enum";
+import { AccountUpdateData, UpdateBalance } from "./account.domain";
+import { AccountOperationEnum } from "./account.enum";
 
 export default class AccountService {
 	private readonly prisma: PrismaClient;
@@ -29,19 +29,15 @@ export default class AccountService {
 		return account;
 	}
 
-	async updateBalance(
-		customerId: string,
-		amount: number,
-		type: AccountOperationType,
-	): Promise<Account> {
-		const accountId = await this.getAccountId(customerId);
+	async updateBalance(data: UpdateBalance): Promise<Account> {
+		const accountId = await this.getAccountId(data.customerId);
 
 		const accountUpdateData: AccountUpdateData = {};
 
-		if (type === AccountOperationType.INCREMENT) {
-			accountUpdateData.increment = amount;
-		} else if (type === AccountOperationType.DECREMENT) {
-			accountUpdateData.decrement = amount;
+		if (data.type === AccountOperationEnum.INCREMENT) {
+			accountUpdateData.increment = data.amount;
+		} else if (data.type === AccountOperationEnum.DECREMENT) {
+			accountUpdateData.decrement = data.amount;
 		}
 
 		const updatedAccount = await this.prisma.account.update({

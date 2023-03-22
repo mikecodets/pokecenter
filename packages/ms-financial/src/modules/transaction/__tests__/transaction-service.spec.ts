@@ -36,10 +36,10 @@ describe("TransactionService", () => {
 
 			prismaMock.transaction.create.mockResolvedValueOnce(transaction);
 
-			const deposit = await transactionService.deposit(
-				customer.id,
+			const deposit = await transactionService.deposit({
+				customerId: customer.id,
 				transaction,
-			);
+			});
 
 			expect(deposit).toEqual(transaction);
 		});
@@ -66,10 +66,10 @@ describe("TransactionService", () => {
 
 			prismaMock.transaction.create.mockResolvedValue(transaction);
 
-			const withdraw = await transactionService.withdraw(
-				customer.id,
+			const withdraw = await transactionService.withdraw({
+				customerId: customer.id,
 				transaction,
-			);
+			});
 
 			expect(withdraw.amount).toBe(transaction.amount);
 			expect(withdraw.methodPayment).toBe(transaction.methodPayment);
@@ -94,7 +94,7 @@ describe("TransactionService", () => {
 			prismaMock.transaction.create.mockResolvedValue(transaction);
 
 			await expect(
-				transactionService.withdraw(customer.id, transaction),
+				transactionService.withdraw({ customerId: customer.id, transaction }),
 			).rejects.toThrow(
 				"The amount is greater than your account balance, please review your balance and redo the transaction",
 			);
@@ -103,13 +103,17 @@ describe("TransactionService", () => {
 
 	describe("transfer", () => {
 		test("should validate transaction amount", async () => {
-			const paying = customerGeneratorMock();
-			const beneficiary = customerGeneratorMock();
+			const payer = customerGeneratorMock();
+			const receiver = customerGeneratorMock();
 			const transaction = transactionGeneratorMock();
 			transaction.amount = -50;
 
 			await expect(
-				transactionService.transfer(paying.id, beneficiary.id, transaction),
+				transactionService.transfer({
+					payerId: payer.id,
+					receiverId: receiver.id,
+					transaction,
+				}),
 			).rejects.toThrow();
 		});
 
@@ -118,28 +122,32 @@ describe("TransactionService", () => {
 			const transaction = transactionGeneratorMock();
 			transaction.customerId = customer.id;
 			await expect(
-				transactionService.transfer(customer.id, customer.id, transaction),
+				transactionService.transfer({
+					payerId: customer.id,
+					receiverId: customer.id,
+					transaction,
+				}),
 			).rejects.toThrowError("It is not possible to perform a self transfer");
 		});
 
-		it("should withdraw from payer and deposit to beneficiary", async () => {
+		it("should withdraw from payer and deposit to receiver", async () => {
 			const transaction = transactionGeneratorMock();
 
-			const paying = customerGeneratorMock();
+			const payer = customerGeneratorMock();
 			const accountPaying = accountGeneratorMock();
-			paying.accountId = accountPaying.id;
-			const payingWithAccount = { ...paying, account: accountPaying };
+			payer.accountId = accountPaying.id;
+			const payerWithAccount = { ...payer, account: accountPaying };
 
-			const beneficiary = customerGeneratorMock();
+			const receiver = customerGeneratorMock();
 			const accountBeneficiary = accountGeneratorMock();
-			beneficiary.accountId = accountBeneficiary.id;
-			const beneficiaryWithAccount = { ...paying, account: accountBeneficiary };
+			receiver.accountId = accountBeneficiary.id;
+			const receiverWithAccount = { ...payer, account: accountBeneficiary };
 
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
-				payingWithAccount,
+				payerWithAccount,
 			);
 			mockedCustomerService.prototype.getById.mockResolvedValueOnce(
-				beneficiaryWithAccount,
+				receiverWithAccount,
 			);
 
 			jest
@@ -156,18 +164,18 @@ describe("TransactionService", () => {
 				accountBeneficiary,
 			);
 
-			const payingId = paying.id;
-			const beneficiaryId = beneficiary.id;
+			const payerId = payer.id;
+			const receiverId = receiver.id;
 
-			const transfer = await transactionService.transfer(
-				payingId,
-				beneficiaryId,
+			const transfer = await transactionService.transfer({
+				payerId,
+				receiverId,
 				transaction,
-			);
+			});
 
 			expect(transfer).toMatchObject({
-				paying: { transaction, account: accountPaying },
-				beneficiary: { transaction, account: accountBeneficiary },
+				payer: { transaction, account: accountPaying },
+				receiver: { transaction, account: accountBeneficiary },
 			});
 		});
 	});

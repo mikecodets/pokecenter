@@ -1,5 +1,5 @@
 import { Account, Customer } from "@prisma/client";
 
-export type CustomerWithAccount = Customer & {
+export interface CustomerWithAccount extends Customer {
 	account: Account | null;
-};
+}
