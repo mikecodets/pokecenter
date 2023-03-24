@@ -34,10 +34,15 @@ export default class AccountService {
 
 		const accountUpdateData: AccountUpdateData = {};
 
-		if (data.type === AccountOperationEnum.INCREMENT) {
+		switch (data.type) {
+		case AccountOperationEnum.INCREMENT:
 			accountUpdateData.increment = data.amount;
-		} else if (data.type === AccountOperationEnum.DECREMENT) {
+			break;
+		case AccountOperationEnum.DECREMENT:
 			accountUpdateData.decrement = data.amount;
+			break;
+		default:
+			break;
 		}
 
 		const updatedAccount = await this.prisma.account.update({
